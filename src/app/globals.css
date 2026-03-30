@@ -24,3 +24,25 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+@layer base {
+  a, button, [role="button"], input[type="submit"], input[type="button"], label[for] {
+    cursor: pointer;
+  }
+}
+
+.transition-all-custom {
+  transition: all 0.2s ease-in-out;
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+}
+
+.hover-scale:hover {
+  transform: scale(1.02);
+}
+
+.interactive-hover:hover {
+  opacity: 0.8;
+}

@@ -14,14 +14,19 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 
-const loginSchema = z.object({
+const registerSchema = z.object({
+  name: z.string().min(2, 'Name must be at least 2 characters'),
   email: z.string().email('Invalid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
+  confirmPassword: z.string().min(6, 'Password must be at least 6 characters'),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
 });
 
-type LoginFormValues = z.infer<typeof loginSchema>;
+type RegisterFormValues = z.infer<typeof registerSchema>;
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const { login } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -30,19 +35,23 @@ export default function LoginPage() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
+  } = useForm<RegisterFormValues>({
+    resolver: zodResolver(registerSchema),
   });
 
-  const onSubmit = async (data: LoginFormValues) => {
+  const onSubmit = async (data: RegisterFormValues) => {
     setIsLoading(true);
     try {
-      const response = await api.post('/auth/login', data);
+      const response = await api.post('/auth/register', {
+        name: data.name,
+        email: data.email,
+        password: data.password,
+      });
       const { token, user } = response.data.data;
       login(token, user);
-      toast.success('Login successful!');
+      toast.success('Registration successful!');
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Failed to login');
+      toast.error(error.response?.data?.message || 'Failed to register');
     } finally {
       setIsLoading(false);
     }
@@ -57,13 +66,20 @@ export default function LoginPage() {
       </div>
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Login</CardTitle>
+          <CardTitle className="text-2xl font-bold">Create an account</CardTitle>
           <CardDescription>
-            Enter your email and password to access your account
+            Enter your information to create a new account
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <Input
+              label="Full Name"
+              type="text"
+              placeholder="John Doe"
+              {...register('name')}
+              error={errors.name?.message}
+            />
             <Input
               label="Email"
               type="email"
@@ -78,16 +94,23 @@ export default function LoginPage() {
               {...register('password')}
               error={errors.password?.message}
             />
+            <Input
+              label="Confirm Password"
+              type="password"
+              placeholder="••••••••"
+              {...register('confirmPassword')}
+              error={errors.confirmPassword?.message}
+            />
             <Button type="submit" className="w-full" isLoading={isLoading}>
-              Login
+              Sign up
             </Button>
           </form>
         </CardContent>
         <CardFooter className="flex flex-col space-y-4">
           <div className="text-sm text-zinc-500 dark:text-zinc-400">
-            Don&apos;t have an account?{' '}
-            <Link href="/register" className="text-black underline dark:text-white">
-              Sign up
+            Already have an account?{' '}
+            <Link href="/login" className="text-black underline dark:text-white">
+              Login
             </Link>
           </div>
         </CardFooter>

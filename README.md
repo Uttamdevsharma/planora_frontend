@@ -1,36 +1,50 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Planora Frontend
+
+The frontend for Planora is built with Next.js 15, React 19, Tailwind CSS 4, and TanStack Query.
+
+## Features
+
+- **Authentication**: Secure Login/Register with JWT (stored in cookies).
+- **Home**: Hero section for featured events and a grid of upcoming events.
+- **Events**: Search and filter events by visibility, fee, and type.
+- **Event Details**: Full event info, dynamic participation logic, and review system.
+- **Dashboard**:
+  - My Events (CRUD management)
+  - My Participations (Join status)
+  - My Earnings (Revenue tracking)
+  - Invitations (Manage invites)
+  - Settings (Profile & Image update)
+- **Payment**: Stripe integration for paid events.
+- **Image Upload**: Cloudinary integration for profile and event banners.
+- **Loading States**: Skeleton loaders for a better user experience.
 
 ## Getting Started
 
-First, run the development server:
+1.  **Install dependencies**:
+    ```bash
+    npm install
+    ```
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+2.  **Set up environment variables**:
+    Create a `.env.local` file in the `client` directory with the following:
+    ```env
+    NEXT_PUBLIC_API_URL=http://localhost:5000/api/v1
+    ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+3.  **Run the development server**:
+    ```bash
+    npm run dev
+    ```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+4.  **Open the app**:
+    Go to [http://localhost:3000](http://localhost:3000) to see the result.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Tech Stack
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Framework**: Next.js (App Router)
+- **Styling**: Tailwind CSS, Framer Motion
+- **Icons**: Lucide React
+- **Data Fetching**: Axios, TanStack Query
+- **Forms**: React Hook Form, Zod
+- **Auth**: js-cookie
+- **Notifications**: Sonner
