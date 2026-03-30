@@ -22,24 +22,26 @@ export default function DashboardOverview() {
   const { data: stats, isLoading: isStatsLoading } = useQuery({
     queryKey: ['dashboardStats'],
     queryFn: async () => {
-      const response = await api.get('/admin/stats'); // Reusing admin stats or I'll implement user specific stats
+      const response = await api.get('/users/stats');
       return response.data.data;
     },
   });
 
   const { data: myEvents, isLoading: isEventsLoading } = useQuery({
-    queryKey: ['myEvents'],
+    queryKey: ['myEvents', user?.id],
     queryFn: async () => {
-      const response = await api.get('/events?limit=3'); // This should ideally be /events/my-events
-      return response.data.data;
+      if (!user?.id) return [];
+      const response = await api.get(`/events?creatorId=${user.id}&limit=3`);
+      return response.data.data?.data || [];
     },
+    enabled: !!user?.id,
   });
 
   const statCards = [
     { name: 'Total Events', value: stats?.totalEvents || 0, icon: Calendar, color: 'text-blue-500', bg: 'bg-blue-50' },
     { name: 'Participants', value: stats?.totalParticipants || 0, icon: Users, color: 'text-purple-500', bg: 'bg-purple-50' },
     { name: 'Total Earnings', value: `$${stats?.totalEarnings || 0}`, icon: Wallet, color: 'text-green-500', bg: 'bg-green-50' },
-    { name: 'Pending Invitations', value: 0, icon: Mail, color: 'text-orange-500', bg: 'bg-orange-50' },
+    { name: 'Pending Invitations', value: stats?.pendingInvitations || 0, icon: Mail, color: 'text-orange-500', bg: 'bg-orange-50' },
   ];
 
   return (
