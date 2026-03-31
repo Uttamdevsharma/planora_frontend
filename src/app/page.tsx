@@ -160,51 +160,51 @@ export default function HomePage() {
         {/* Upcoming Events Slider SECTION */}
         <section className="py-20 bg-zinc-50 dark:bg-zinc-950 overflow-hidden">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="flex items-end justify-between mb-10">
-              <div>
-                <h2 className="text-3xl font-extrabold text-zinc-900 dark:text-white sm:text-4xl">Upcoming Events</h2>
-                <p className="mt-4 text-lg text-zinc-500">The hottest events happening on Planora right now.</p>
-              </div>
-              <div className="hidden sm:flex gap-3">
-                <button 
-                    onClick={() => scrollSlider('left')}
-                    className="p-3 rounded-full border border-zinc-200 bg-white shadow-sm hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 transition-all hover:scale-110"
-                >
-                    <ChevronLeft className="h-6 w-6" />
-                </button>
-                <button 
-                    onClick={() => scrollSlider('right')}
-                    className="p-3 rounded-full border border-zinc-200 bg-white shadow-sm hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 transition-all hover:scale-110"
-                >
-                    <ChevronRight className="h-6 w-6" />
-                </button>
-              </div>
+            <div className="mb-12">
+              <h2 className="text-3xl font-extrabold text-zinc-900 dark:text-white sm:text-4xl">Upcoming Events</h2>
+              <p className="mt-4 text-lg text-zinc-500">The hottest events happening on Planora right now.</p>
             </div>
 
-            <div 
-                ref={sliderRef}
-                className="flex gap-6 overflow-x-auto pb-8 snap-x snap-mandatory scrollbar-hide no-scrollbar"
-                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-            >
-              {isUpcomingLoading ? (
-                [...Array(6)].map((_, i) => (
-                  <div key={i} className="min-w-[320px] sm:min-w-[400px] snap-start">
-                    <Skeleton className="aspect-video w-full rounded-3xl" />
-                    <Skeleton className="mt-4 h-6 w-3/4" />
-                    <Skeleton className="mt-2 h-4 w-1/2" />
+            <div className="relative group px-4 sm:px-0">
+              <button 
+                  onClick={() => scrollSlider('left')}
+                  className="absolute left-0 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full border border-zinc-200 bg-white/80 backdrop-blur-md shadow-xl hover:bg-white dark:border-zinc-800 dark:bg-zinc-900/80 dark:hover:bg-zinc-900 transition-all hover:scale-110 hidden sm:flex items-center justify-center -ml-4 lg:-ml-6"
+              >
+                  <ChevronLeft className="h-6 w-6" />
+              </button>
+
+              <div 
+                  ref={sliderRef}
+                  className="flex gap-6 overflow-x-auto pb-8 snap-x snap-mandatory scrollbar-hide no-scrollbar"
+                  style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+              >
+                {isUpcomingLoading ? (
+                  [...Array(6)].map((_, i) => (
+                    <div key={i} className="min-w-[320px] sm:min-w-[400px] snap-start">
+                      <Skeleton className="aspect-video w-full rounded-3xl" />
+                      <Skeleton className="mt-4 h-6 w-3/4" />
+                      <Skeleton className="mt-2 h-4 w-1/2" />
+                    </div>
+                  ))
+                ) : upcomingEvents && upcomingEvents.length > 0 ? (
+                  upcomingEvents.map((event: any) => (
+                    <div key={event.id} className="min-w-[320px] sm:min-w-[400px] snap-start h-full">
+                      <EventCard event={event} />
+                    </div>
+                  ))
+                ) : (
+                  <div className="w-full text-center py-20 text-zinc-400 font-medium">
+                      New public events will appear here soon.
                   </div>
-                ))
-              ) : upcomingEvents && upcomingEvents.length > 0 ? (
-                upcomingEvents.map((event: any) => (
-                  <div key={event.id} className="min-w-[320px] sm:min-w-[400px] snap-start h-full">
-                    <EventCard event={event} />
-                  </div>
-                ))
-              ) : (
-                <div className="w-full text-center py-20 text-zinc-400 font-medium">
-                    New public events will appear here soon.
-                </div>
-              )}
+                )}
+              </div>
+
+              <button 
+                  onClick={() => scrollSlider('right')}
+                  className="absolute right-0 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full border border-zinc-200 bg-white/80 backdrop-blur-md shadow-xl hover:bg-white dark:border-zinc-800 dark:bg-zinc-900/80 dark:hover:bg-zinc-900 transition-all hover:scale-110 hidden sm:flex items-center justify-center -mr-4 lg:-mr-6"
+              >
+                  <ChevronRight className="h-6 w-6" />
+              </button>
             </div>
           </div>
         </section>

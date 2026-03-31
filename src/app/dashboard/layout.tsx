@@ -39,7 +39,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { name: 'Earnings', href: '/dashboard/earnings', icon: Wallet },
     { name: 'Invitations', href: '/dashboard/invitations', icon: Mail },
     { name: 'Settings', href: '/dashboard/settings', icon: Settings },
-  ];
+  ].filter(link => {
+    if (link.name === 'Earnings' && user?.role === 'USER') return false;
+    return true;
+  });
 
   return (
     <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-black overflow-hidden">
