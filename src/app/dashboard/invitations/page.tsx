@@ -61,9 +61,8 @@ export default function InvitationsPage() {
 
   const allInvitations = invitationsData?.data || [];
   
-  // Filter based on whether current user is receiver or sender
-  const receivedInvitations = allInvitations.filter((inv: any) => inv.receiverId === user?.id);
-  const sentInvitations = allInvitations.filter((inv: any) => inv.senderId === user?.id);
+  const receivedInvitations = allInvitations.filter((inv: any) => inv.receiverId === user?.id && inv.status === 'PENDING');
+  const sentInvitations = allInvitations.filter((inv: any) => inv.senderId === user?.id && inv.status === 'PENDING');
   
   const displayedInvitations = activeTab === 'received' ? receivedInvitations : sentInvitations;
 
