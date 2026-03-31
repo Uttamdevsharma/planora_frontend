@@ -8,14 +8,15 @@ import { Footer } from '@/components/ui/Footer';
 import { Button } from '@/components/ui/Button';
 import { EventCard, Event } from '@/components/ui/EventCard';
 import { Skeleton } from '@/components/ui/Skeleton';
-import { Calendar, ArrowRight, Star, Plus, Search } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Calendar, ArrowRight, Star, Plus, Search, ChevronLeft, ChevronRight, Video, MapPin, Tag, User } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { motion } from 'framer-motion';
 
 export default function HomePage() {
   const router = useRouter();
-  const [filter, setFilter] = useState('ALL');
+  const [filter, setFilter] = useState('PUBLIC_FREE');
+  const sliderRef = React.useRef<HTMLDivElement>(null);
 
   const { data: featuredEvent, isLoading: isFeaturedLoading } = useQuery({
     queryKey: ['featuredEvent'],
@@ -30,19 +31,27 @@ export default function HomePage() {
     },
   });
 
-  const { data: upcomingEventsData, isLoading: isEventsLoading } = useQuery({
-    queryKey: ['upcomingEvents', filter],
+  const { data: upcomingEvents, isLoading: isUpcomingLoading } = useQuery({
+    queryKey: ['upcomingEventsSlider'],
     queryFn: async () => {
-      let url = '/events?limit=9';
+      const response = await api.get('/events?limit=9&isPublic=true');
+      return response.data?.data?.data || [];
+    },
+  });
+
+  const { data: categoryEventsData, isLoading: isCategoryLoading } = useQuery({
+    queryKey: ['categoryEvents', filter],
+    queryFn: async () => {
+      let url = '/events?limit=8';
       
-      if (filter === 'ALL') {
-          url += '&isPublic=true';
-      } else if (filter === 'FREE') {
+      if (filter === 'PUBLIC_FREE') {
           url += '&isPublic=true&feeType=free';
-      } else if (filter === 'PAID') {
+      } else if (filter === 'PUBLIC_PAID') {
           url += '&isPublic=true&feeType=paid';
-      } else if (filter === 'PRIVATE') {
-          url += '&isPublic=false';
+      } else if (filter === 'PRIVATE_FREE') {
+          url += '&isPublic=false&feeType=free';
+      } else if (filter === 'PRIVATE_PAID') {
+          url += '&isPublic=false&feeType=paid';
       }
       
       const response = await api.get(url);
@@ -50,14 +59,22 @@ export default function HomePage() {
     },
   });
 
-  const upcomingEvents = upcomingEventsData?.data?.data || [];
+  const categoryEvents = categoryEventsData?.data?.data || [];
 
   const categories = [
-    { id: 'ALL', name: 'All Events' },
-    { id: 'FREE', name: 'Public Free' },
-    { id: 'PAID', name: 'Public Paid' },
-    { id: 'PRIVATE', name: 'Private Events' },
+    { id: 'PUBLIC_FREE', name: 'Public Free' },
+    { id: 'PUBLIC_PAID', name: 'Public Paid' },
+    { id: 'PRIVATE_FREE', name: 'Private Free' },
+    { id: 'PRIVATE_PAID', name: 'Private Paid' },
   ];
+
+  const scrollSlider = (direction: 'left' | 'right') => {
+    if (sliderRef.current) {
+        const { scrollLeft, clientWidth } = sliderRef.current;
+        const scrollAmount = direction === 'left' ? -clientWidth : clientWidth;
+        sliderRef.current.scrollTo({ left: scrollLeft + scrollAmount, behavior: 'smooth' });
+    }
+  };
 
   return (
     <div className="flex min-h-screen flex-col bg-white dark:bg-black">
@@ -140,76 +157,121 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Categories Section */}
-        <section className="border-y border-zinc-100 bg-zinc-50/50 py-10 dark:border-zinc-800 dark:bg-zinc-900/50">
+        {/* Upcoming Events Slider SECTION */}
+        <section className="py-20 bg-zinc-50 dark:bg-zinc-950 overflow-hidden">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
-              <h2 className="text-2xl font-bold text-zinc-900 dark:text-white">Explore Events</h2>
-              <div className="flex flex-wrap justify-center gap-2">
-                {categories.map((cat) => (
-                  <button
-                    key={cat.id}
-                    onClick={() => setFilter(cat.id)}
-                    className={`rounded-full px-5 py-2 text-sm font-medium transition-all ${
-                      filter === cat.id
-                        ? 'bg-black text-white dark:bg-white dark:text-black shadow-lg'
-                        : 'bg-white text-zinc-600 border border-zinc-200 hover:border-zinc-300 dark:bg-zinc-800 dark:text-zinc-400 dark:border-zinc-700 dark:hover:border-zinc-600'
-                    }`}
-                  >
-                    {cat.name}
-                  </button>
-                ))}
+            <div className="flex items-end justify-between mb-10">
+              <div>
+                <h2 className="text-3xl font-extrabold text-zinc-900 dark:text-white sm:text-4xl">Upcoming Events</h2>
+                <p className="mt-4 text-lg text-zinc-500">The hottest events happening on Planora right now.</p>
               </div>
+              <div className="hidden sm:flex gap-3">
+                <button 
+                    onClick={() => scrollSlider('left')}
+                    className="p-3 rounded-full border border-zinc-200 bg-white shadow-sm hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 transition-all hover:scale-110"
+                >
+                    <ChevronLeft className="h-6 w-6" />
+                </button>
+                <button 
+                    onClick={() => scrollSlider('right')}
+                    className="p-3 rounded-full border border-zinc-200 bg-white shadow-sm hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 transition-all hover:scale-110"
+                >
+                    <ChevronRight className="h-6 w-6" />
+                </button>
+              </div>
+            </div>
+
+            <div 
+                ref={sliderRef}
+                className="flex gap-6 overflow-x-auto pb-8 snap-x snap-mandatory scrollbar-hide no-scrollbar"
+                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
+              {isUpcomingLoading ? (
+                [...Array(6)].map((_, i) => (
+                  <div key={i} className="min-w-[320px] sm:min-w-[400px] snap-start">
+                    <Skeleton className="aspect-video w-full rounded-3xl" />
+                    <Skeleton className="mt-4 h-6 w-3/4" />
+                    <Skeleton className="mt-2 h-4 w-1/2" />
+                  </div>
+                ))
+              ) : upcomingEvents && upcomingEvents.length > 0 ? (
+                upcomingEvents.map((event: any) => (
+                  <div key={event.id} className="min-w-[320px] sm:min-w-[400px] snap-start h-full">
+                    <EventCard event={event} />
+                  </div>
+                ))
+              ) : (
+                <div className="w-full text-center py-20 text-zinc-400 font-medium">
+                    New public events will appear here soon.
+                </div>
+              )}
             </div>
           </div>
         </section>
 
-        {/* Upcoming Events Grid */}
-        <section className="py-20">
+        {/* Categories Section */}
+        <section className="py-20 border-t border-zinc-100 dark:border-zinc-900">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-             <div className="flex items-center justify-between mb-12">
-                <div>
-                    <h2 className="text-3xl font-bold text-zinc-900 dark:text-white">Upcoming Events</h2>
-                    <p className="mt-2 text-zinc-500">Discover what&apos;s happening next in your community</p>
-                </div>
-                <Button variant="ghost" className="gap-2" onClick={() => router.push('/events')}>
-                    View All <ArrowRight className="h-4 w-4" />
-                </Button>
-             </div>
+            <div className="mb-12">
+               <h2 className="text-3xl font-extrabold text-zinc-900 dark:text-white mb-8">Discover by Category</h2>
+               <div className="flex flex-wrap gap-2">
+                 {categories.map((cat) => (
+                   <button
+                     key={cat.id}
+                     onClick={() => setFilter(cat.id)}
+                     className={`rounded-full px-6 py-2.5 text-sm font-bold transition-all ${
+                       filter === cat.id
+                         ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30'
+                         : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800'
+                     }`}
+                   >
+                     {cat.name}
+                   </button>
+                 ))}
+               </div>
+            </div>
 
-            {isEventsLoading ? (
-              <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-                {[...Array(6)].map((_, i) => (
+            {isCategoryLoading ? (
+              <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+                {[...Array(4)].map((_, i) => (
                   <div key={i} className="space-y-4">
-                    <Skeleton className="aspect-video w-full" />
+                    <Skeleton className="aspect-[4/3] w-full" />
                     <Skeleton className="h-6 w-3/4" />
                     <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-10 w-full" />
                   </div>
                 ))}
               </div>
-            ) : upcomingEvents && upcomingEvents.length > 0 ? (
-              <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-                {upcomingEvents.map((event) => (
+            ) : categoryEvents && categoryEvents.length > 0 ? (
+              <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+                {categoryEvents.map((event: any) => (
                   <motion.div 
                     key={event.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.4 }}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.3 }}
                   >
                     <EventCard event={event} />
                   </motion.div>
                 ))}
               </div>
             ) : (
-              <div className="text-center py-20 bg-zinc-50 dark:bg-zinc-900 rounded-3xl border-2 border-dashed border-zinc-200 dark:border-zinc-800">
+              <div className="text-center py-20 bg-zinc-50 dark:bg-zinc-900/50 rounded-3xl border-2 border-dashed border-zinc-200 dark:border-zinc-800">
                   <Search className="h-12 w-12 text-zinc-300 dark:text-zinc-700 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold mb-2">No events found for this category</h3>
-                  <p className="text-zinc-500 mb-6">Try selecting another category or check back later</p>
-                  <Button variant="outline" onClick={() => setFilter('ALL')}>Clear Filters</Button>
+                  <h3 className="text-xl font-semibold mb-2">No results matching this category</h3>
+                  <p className="text-zinc-500">Check back later or explore one of our other categories!</p>
               </div>
             )}
+            
+            <div className="mt-16 text-center">
+                 <Button 
+                    variant="outline" 
+                    size="lg" 
+                    className="px-10 py-6 rounded-full font-bold border-2"
+                    onClick={() => router.push('/events')}
+                 >
+                    View All Platform Events
+                 </Button>
+            </div>
           </div>
         </section>
 
