@@ -70,9 +70,14 @@ export default function HomePage() {
 
   const scrollSlider = (direction: 'left' | 'right') => {
     if (sliderRef.current) {
-        const { scrollLeft, clientWidth } = sliderRef.current;
-        const scrollAmount = direction === 'left' ? -clientWidth : clientWidth;
-        sliderRef.current.scrollTo({ left: scrollLeft + scrollAmount, behavior: 'smooth' });
+        const { scrollLeft } = sliderRef.current;
+        const firstChild = sliderRef.current.firstElementChild as HTMLElement;
+        if (firstChild) {
+            const cardWidth = firstChild.offsetWidth;
+            const gap = 24; // matches gap-6
+            const scrollAmount = direction === 'left' ? -(cardWidth + gap) : (cardWidth + gap);
+            sliderRef.current.scrollTo({ left: scrollLeft + scrollAmount, behavior: 'smooth' });
+        }
     }
   };
 
@@ -175,7 +180,7 @@ export default function HomePage() {
 
               <div 
                   ref={sliderRef}
-                  className="flex gap-6 overflow-x-auto pb-8 snap-x snap-mandatory scrollbar-hide no-scrollbar"
+                  className="flex gap-6 items-stretch overflow-x-auto pb-8 snap-x snap-mandatory scrollbar-hide no-scrollbar"
                   style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
               >
                 {isUpcomingLoading ? (
@@ -188,7 +193,7 @@ export default function HomePage() {
                   ))
                 ) : upcomingEvents && upcomingEvents.length > 0 ? (
                   upcomingEvents.map((event: any) => (
-                    <div key={event.id} className="min-w-[320px] sm:min-w-[400px] snap-start h-full">
+                    <div key={event.id} className="w-[320px] sm:w-[400px] flex-shrink-0 snap-start h-full">
                       <EventCard event={event} />
                     </div>
                   ))

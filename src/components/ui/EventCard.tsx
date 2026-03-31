@@ -64,12 +64,16 @@ export const EventCard: React.FC<EventCardProps> = ({ event }) => {
             <Calendar className="h-3.5 w-3.5" />
             {format(new Date(event.date), 'PPP')}
         </div>
-        <h3 className="mb-2 line-clamp-1 text-lg font-bold text-zinc-900 dark:text-white">
-          {event.title}
-        </h3>
-        <p className="mb-4 line-clamp-2 text-sm text-zinc-500 dark:text-zinc-400">
-          {event.description}
-        </p>
+        <div className="min-h-[1.5rem]">
+          <h3 className="mb-2 line-clamp-1 text-lg font-bold text-zinc-900 dark:text-white">
+            {event.title}
+          </h3>
+        </div>
+        <div className="min-h-[2.5rem]">
+          <p className="mb-4 line-clamp-2 text-sm text-zinc-500 dark:text-zinc-400">
+            {event.description}
+          </p>
+        </div>
         <div className="space-y-2">
             <div className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400">
                 <MapPin className="h-4 w-4" />

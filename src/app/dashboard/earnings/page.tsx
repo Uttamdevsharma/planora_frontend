@@ -3,6 +3,8 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import api from '@/lib/api';
+import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { 
@@ -13,6 +15,15 @@ import { format } from 'date-fns';
 import { Button } from '@/components/ui/Button';
 
 export default function EarningsPage() {
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  React.useEffect(() => {
+    if (!loading && user?.role === 'USER') {
+      router.push('/dashboard');
+    }
+  }, [user, loading, router]);
+
   const { data: earnings, isLoading } = useQuery({
     queryKey: ['myEarnings'],
     queryFn: async () => {
@@ -22,6 +33,14 @@ export default function EarningsPage() {
   });
 
   const totalEarnings = earnings?.reduce((acc: number, curr: any) => acc + curr.amount, 0) || 0;
+
+  if (loading || user?.role === 'USER') {
+    return (
+      <div className="flex h-[400px] items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-black border-t-transparent dark:border-white"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">

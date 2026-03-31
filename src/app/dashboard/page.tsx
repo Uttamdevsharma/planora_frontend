@@ -42,10 +42,7 @@ export default function DashboardOverview() {
     { name: 'Participants', value: stats?.totalParticipants || 0, icon: Users, color: 'text-purple-500', bg: 'bg-purple-50' },
     { name: 'Total Earnings', value: `$${stats?.totalEarnings || 0}`, icon: Wallet, color: 'text-green-500', bg: 'bg-green-50' },
     { name: 'Pending Invitations', value: stats?.pendingInvitations || 0, icon: Mail, color: 'text-orange-500', bg: 'bg-orange-50' },
-  ].filter(card => {
-    if (card.name === 'Total Earnings' && user?.role === 'USER') return false;
-    return true;
-  });
+  ];
 
   return (
     <div className="space-y-8">
