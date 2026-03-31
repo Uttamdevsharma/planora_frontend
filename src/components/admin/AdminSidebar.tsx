@@ -9,7 +9,11 @@ import {
 import { Button } from '@/components/ui/Button';
 import { useAuth } from '@/context/AuthContext';
 
-export function AdminSidebar() {
+interface AdminSidebarProps {
+  onLinkClick?: () => void;
+}
+
+export function AdminSidebar({ onLinkClick }: AdminSidebarProps) {
   const router = useRouter();
   const pathname = usePathname();
   const { logout } = useAuth();
@@ -38,7 +42,10 @@ export function AdminSidebar() {
               return (
                 <button
                   key={link.name}
-                  onClick={() => router.push(link.href)}
+                  onClick={() => {
+                      router.push(link.href);
+                      if (onLinkClick) onLinkClick();
+                  }}
                   className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-colors cursor-pointer ${
                     isActive
                       ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/20 dark:text-indigo-400'

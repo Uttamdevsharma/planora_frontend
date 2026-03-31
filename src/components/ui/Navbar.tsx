@@ -8,7 +8,12 @@ import { Menu, X, Calendar, User, LogOut, LayoutDashboard } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation';
 import Image from 'next/image';
 
-export const Navbar = () => {
+interface NavbarProps {
+  isDashboard?: boolean;
+  onMenuClick?: () => void;
+}
+
+export const Navbar = ({ isDashboard = false, onMenuClick }: NavbarProps) => {
   const { user, logout } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
@@ -25,7 +30,17 @@ export const Navbar = () => {
     <nav className="sticky top-0 z-50 w-full border-b border-zinc-200 bg-white/80 backdrop-blur-md dark:border-zinc-800 dark:bg-black/80">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
-          <div className="flex items-center">
+          <div className="flex items-center gap-2">
+            {/* Dashboard Mobile Menu Trigger (Left Side) */}
+            {isDashboard && (
+              <button 
+                onClick={onMenuClick}
+                className="lg:hidden rounded-lg p-2 text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-900"
+              >
+                <Menu className="h-6 w-6" />
+              </button>
+            )}
+
             <button 
                 onClick={() => router.push('/')}
                 className="flex items-center gap-2 text-xl font-bold text-zinc-900 dark:text-white cursor-pointer"
@@ -33,47 +48,56 @@ export const Navbar = () => {
               <Calendar className="h-6 w-6 text-black dark:text-white" />
               <span>Planora</span>
             </button>
-            <div className="hidden md:block">
-              <div className="ml-10 flex items-baseline space-x-4">
-                {navLinks.map((link) => (
-                  <button
-                    key={link.name}
-                    onClick={() => router.push(link.href)}
-                    className={`rounded-md px-3 py-2 text-sm font-medium transition-colors cursor-pointer ${
-                      isActive(link.href)
-                        ? 'bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-white'
-                        : 'text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-white'
-                    }`}
-                  >
-                    {link.name}
-                  </button>
-                ))}
+            
+            {!isDashboard && (
+              <div className="hidden md:block">
+                <div className="ml-10 flex items-baseline space-x-4">
+                  {navLinks.map((link) => (
+                    <button
+                      key={link.name}
+                      onClick={() => router.push(link.href)}
+                      className={`rounded-md px-3 py-2 text-sm font-medium transition-colors cursor-pointer ${
+                        isActive(link.href)
+                          ? 'bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-white'
+                          : 'text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-white'
+                      }`}
+                    >
+                      {link.name}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </div>
           <div className="hidden md:block">
             <div className="ml-4 flex items-center gap-4 md:ml-6">
               {user ? (
                 <div className="flex items-center gap-4">
-                  <button
-                    onClick={() => router.push(user.role === 'ADMIN' ? '/admin/dashboard' : '/dashboard')}
-                    className="flex items-center gap-1.5 text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white transition-colors"
-                  >
-                    <LayoutDashboard className="h-4 w-4" />
-                    {user.role === 'ADMIN' ? 'Admin Dashboard' : 'Dashboard'}
-                  </button>
-                  <div className="h-8 w-8 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700">
+                  {!isDashboard && (
+                    <button
+                      onClick={() => router.push(user.role === 'ADMIN' ? '/admin/dashboard' : '/dashboard')}
+                      className="flex items-center gap-1.5 text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white transition-colors"
+                    >
+                      <LayoutDashboard className="h-4 w-4" />
+                      {user.role === 'ADMIN' ? 'Admin Dashboard' : 'Dashboard'}
+                    </button>
+                  )}
+                  <div className="h-9 w-9 overflow-hidden rounded-full bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800 flex items-center justify-center">
                     {user.image ? (
-                        <Image src={user.image} alt={user.name} width={32} height={32} className="h-full w-full object-cover" />
+                        <Image src={user.image} alt={user.name} width={36} height={36} className="h-full w-full object-cover" />
                     ) : (
-                        <div className="flex h-full w-full items-center justify-center text-xs font-bold text-zinc-500">
+                        <div className="text-sm font-bold text-indigo-600 dark:text-indigo-400">
                             {user.name.charAt(0).toUpperCase()}
                         </div>
                     )}
                   </div>
-                  <Button variant="ghost" size="sm" onClick={logout} className="flex items-center gap-1.5">
-                    <LogOut className="h-4 w-4" />
-                    Logout
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={logout} 
+                    className="text-zinc-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
+                  >
+                    <LogOut className="h-5 w-5" />
                   </Button>
                 </div>
               ) : (
@@ -88,13 +112,28 @@ export const Navbar = () => {
               )}
             </div>
           </div>
-          <div className="-mr-2 flex md:hidden">
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              className="inline-flex items-center justify-center rounded-md p-2 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-950 focus:ring-offset-2 dark:hover:bg-zinc-900"
-            >
-              {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </button>
+          <div className="flex items-center gap-2 md:hidden">
+            {isDashboard && user && (
+               <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 overflow-hidden rounded-full bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800 flex items-center justify-center">
+                    <div className="text-xs font-bold text-indigo-600 dark:text-indigo-400">
+                        {user.name.charAt(0).toUpperCase()}
+                    </div>
+                  </div>
+                  <button onClick={logout} className="p-2 text-zinc-500">
+                    <LogOut className="h-5 w-5" />
+                  </button>
+               </div>
+            )}
+            
+            {!isDashboard && (
+              <button
+                onClick={() => setIsOpen(!isOpen)}
+                className="inline-flex items-center justify-center rounded-md p-2 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-950 focus:ring-offset-2 dark:hover:bg-zinc-900"
+              >
+                {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              </button>
+            )}
           </div>
         </div>
       </div>
