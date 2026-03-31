@@ -7,7 +7,7 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { 
   Calendar, Trash2, Search, MapPin, 
-  Video, Globe, DollarSign, User
+  Video, Globe, DollarSign, User, Star
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/Skeleton';
@@ -37,10 +37,27 @@ export default function AdminEventsPage() {
     },
   });
 
+  const toggleFeaturedMutation = useMutation({
+    mutationFn: ({ eventId, isFeatured }: { eventId: string, isFeatured: boolean }) => 
+      api.patch(`/admin/events/${eventId}/feature`, { isFeatured }),
+    onSuccess: (data) => {
+      const isFeatured = data.data.data.isFeatured;
+      toast.success(isFeatured ? 'Event marked as featured!' : 'Event removed from featured');
+      queryClient.invalidateQueries({ queryKey: ['adminEvents'] });
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.message || 'Failed to update featured status');
+    },
+  });
+
   const handleDelete = (eventId: string) => {
     if (window.confirm('Are you sure you want to delete this event? This will also remove all associated participants and data.')) {
       deleteEventMutation.mutate(eventId);
     }
+  };
+
+  const handleToggleFeatured = (eventId: string, currentStatus: boolean) => {
+    toggleFeaturedMutation.mutate({ eventId, isFeatured: !currentStatus });
   };
 
   const events = eventsData || [];
@@ -76,7 +93,7 @@ export default function AdminEventsPage() {
                 <th className="px-6 py-4 font-semibold text-zinc-900 dark:text-zinc-100 uppercase tracking-tight text-xs">Event</th>
                 <th className="px-6 py-4 font-semibold text-zinc-900 dark:text-zinc-100 uppercase tracking-tight text-xs">Creator</th>
                 <th className="px-6 py-4 font-semibold text-zinc-900 dark:text-zinc-100 uppercase tracking-tight text-xs">Type</th>
-                <th className="px-6 py-4 font-semibold text-zinc-900 dark:text-zinc-100 uppercase tracking-tight text-xs">Fee</th>
+                <th className="px-6 py-4 font-semibold text-zinc-900 dark:text-zinc-100 uppercase tracking-tight text-xs text-center">Featured</th>
                 <th className="px-6 py-4 font-semibold text-zinc-900 dark:text-zinc-100 uppercase tracking-tight text-xs text-right">Actions</th>
               </tr>
             </thead>
@@ -144,16 +161,34 @@ export default function AdminEventsPage() {
                          )}
                       </div>
                     </td>
+                    <td className="px-6 py-4">
+                      <div className="flex justify-center">
+                        <button
+                          onClick={() => handleToggleFeatured(e.id, e.isFeatured)}
+                          disabled={toggleFeaturedMutation.isPending}
+                          className={`p-2 rounded-lg transition-all ${
+                            e.isFeatured 
+                              ? 'text-amber-500 bg-amber-50 dark:bg-amber-900/20' 
+                              : 'text-zinc-300 hover:text-amber-400 hover:bg-zinc-50 dark:hover:bg-zinc-900'
+                          }`}
+                          title={e.isFeatured ? 'Remove as featured' : 'Mark as featured'}
+                        >
+                          <Star className={`h-5 w-5 ${e.isFeatured ? 'fill-current' : ''}`} />
+                        </button>
+                      </div>
+                    </td>
                     <td className="px-6 py-4 text-right">
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="h-8 w-8 p-0 text-red-600 border-red-100 hover:bg-red-50 dark:hover:bg-red-950/30 group"
-                        onClick={() => handleDelete(e.id)}
-                        disabled={deleteEventMutation.isPending}
-                      >
-                        <Trash2 className="h-4 w-4 transition-transform group-hover:scale-110" />
-                      </Button>
+                      <div className="flex justify-end gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="h-8 w-8 p-0 text-red-600 border-red-100 hover:bg-red-50 dark:hover:bg-red-950/30 group"
+                          onClick={() => handleDelete(e.id)}
+                          disabled={deleteEventMutation.isPending}
+                        >
+                          <Trash2 className="h-4 w-4 transition-transform group-hover:scale-110" />
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 ))
