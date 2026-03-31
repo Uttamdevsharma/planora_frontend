@@ -24,6 +24,8 @@ export default function PaymentSuccessPage() {
       }
 
       try {
+        // Wait a couple of seconds to ensure Stripe background processes have finished
+        await new Promise(resolve => setTimeout(resolve, 2000));
         await api.get(`/payments/verify-payment?session_id=${sessionId}`);
         toast.success('Payment verified successfully!');
       } catch (error: any) {

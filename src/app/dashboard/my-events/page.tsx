@@ -11,7 +11,7 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { 
     Plus, Search, Edit2, Trash2, 
     MoreVertical, ExternalLink, Calendar,
-    MapPin, Users, Filter, X, Upload
+    MapPin, Users, Filter, X, Upload, Mail
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
@@ -241,11 +241,14 @@ export default function MyEventsPage() {
                                     </Button>
                                 </div>
                             </div>
-                            <div className="mt-6 flex justify-end gap-3">
+                            <div className="mt-6 flex flex-wrap justify-end gap-3">
                                 <Button variant="ghost" size="sm" className="gap-2" onClick={() => window.open(`/events/${event.id}`, '_blank')}>
                                     <ExternalLink className="h-4 w-4" /> View Public Page
                                 </Button>
-                                <Button size="sm" onClick={() => router.push(`/dashboard/my-events/${event.id}`)}>
+                                <Button variant="secondary" size="sm" className="gap-2" onClick={() => router.push('/dashboard/invite-users/' + event.id)}>
+                                    <Mail className="h-4 w-4" /> Invite Users
+                                </Button>
+                                <Button size="sm" onClick={() => router.push('/dashboard/my-events/' + event.id)}>
                                     Manage Participants
                                 </Button>
                             </div>

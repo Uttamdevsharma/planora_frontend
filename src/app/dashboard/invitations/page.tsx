@@ -1,139 +1,173 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useAuth } from '@/context/AuthContext';
 import api from '@/lib/api';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
+import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Skeleton } from '@/components/ui/Skeleton';
-import { 
-    Mail, Calendar, User, 
-    Check, X, DollarSign, Clock
-} from 'lucide-react';
+import { Calendar, MapPin, CreditCard, CheckCircle, XCircle, Mail } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 
 export default function InvitationsPage() {
+  const { user } = useAuth();
   const queryClient = useQueryClient();
+  const [activeTab, setActiveTab] = useState<'received' | 'sent'>('received');
 
-  const { data: invitations, isLoading } = useQuery({
-    queryKey: ['myInvitations'],
+  const { data: invitationsData, isLoading } = useQuery({
+    queryKey: ['invitationsList'],
     queryFn: async () => {
-      const response = await api.get('/invitations/my-invitations');
-      return response.data.data;
+      const response = await api.get('/invitations');
+      return response.data;
     },
   });
 
-  const respondMutation = useMutation({
-    mutationFn: ({ invitationId, status }: { invitationId: string; status: string }) => 
-      api.patch(`/invitations/${invitationId}/respond`, { status }),
-    onSuccess: (res) => {
-      toast.success(res.data.message || 'Response sent');
-      queryClient.invalidateQueries({ queryKey: ['myInvitations'] });
+  const updateStatusMutation = useMutation({
+    mutationFn: ({ id, status }: { id: string; status: 'ACCEPTED' | 'DECLINED' }) => 
+      api.patch(`/invitations/${id}/status`, { status }),
+    onSuccess: () => {
+      toast.success('Invitation updated successfully');
+      queryClient.invalidateQueries({ queryKey: ['invitationsList'] });
     },
-    onError: (err: any) => toast.error(err.response?.data?.message || 'Failed to respond'),
+    onError: (err: any) => toast.error(err.response?.data?.message || 'Failed to update invitation'),
   });
 
   const payAndAcceptMutation = useMutation({
-    mutationFn: async (eventId: string) => {
-      const response = await api.post('/payments/checkout', { eventId });
-      return response.data.data;
-    },
-    onSuccess: (data) => {
-      if (data.url) {
-        window.location.href = data.url;
+    mutationFn: (id: string) => api.patch(`/invitations/${id}/pay-accept`),
+    onSuccess: (res) => {
+      const { url } = res.data.data;
+      if (url) {
+        window.location.href = url;
+      } else {
+        toast.error('Failed to get payment URL');
       }
     },
-    onError: (err: any) => toast.error(err.response?.data?.message || 'Payment initiation failed'),
+    onError: (err: any) => toast.error(err.response?.data?.message || 'Failed to process payment'),
   });
+
+  const handleAccept = (invitation: any) => {
+    if (invitation.event.fee > 0) {
+      payAndAcceptMutation.mutate(invitation.id);
+    } else {
+      updateStatusMutation.mutate({ id: invitation.id, status: 'ACCEPTED' });
+    }
+  };
+
+  const handleDecline = (id: string) => {
+    updateStatusMutation.mutate({ id, status: 'DECLINED' });
+  };
+
+  const allInvitations = invitationsData?.data || [];
+  
+  // Filter based on whether current user is receiver or sender
+  const receivedInvitations = allInvitations.filter((inv: any) => inv.receiverId === user?.id);
+  const sentInvitations = allInvitations.filter((inv: any) => inv.senderId === user?.id);
+  
+  const displayedInvitations = activeTab === 'received' ? receivedInvitations : sentInvitations;
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Invitations</h1>
-        <p className="text-zinc-500">Invitations sent to you for private events.</p>
+        <p className="text-zinc-500">Manage your event invitations.</p>
+      </div>
+
+      <div className="flex gap-4 border-b border-zinc-200 dark:border-zinc-800">
+        <button 
+          className={`pb-3 font-medium text-sm transition-colors relative ${activeTab === 'received' ? 'text-zinc-900 dark:text-zinc-100' : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'}`}
+          onClick={() => setActiveTab('received')}
+        >
+          Received
+          {activeTab === 'received' && (
+            <span className="absolute bottom-0 left-0 w-full h-0.5 bg-zinc-900 dark:bg-zinc-100 rounded-t-full"></span>
+          )}
+        </button>
+        <button 
+          className={`pb-3 font-medium text-sm transition-colors relative ${activeTab === 'sent' ? 'text-zinc-900 dark:text-zinc-100' : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'}`}
+          onClick={() => setActiveTab('sent')}
+        >
+          Sent
+          {activeTab === 'sent' && (
+            <span className="absolute bottom-0 left-0 w-full h-0.5 bg-zinc-900 dark:bg-zinc-100 rounded-t-full"></span>
+          )}
+        </button>
       </div>
 
       <div className="grid grid-cols-1 gap-4">
         {isLoading ? (
-            [...Array(3)].map((_, i) => <Skeleton key={i} className="h-32 w-full rounded-2xl" />)
-        ) : invitations && invitations.length > 0 ? (
-            invitations.map((inv: any) => (
-                <Card key={inv.id} className="overflow-hidden">
-                    <CardContent className="p-6">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-                            <div className="flex items-start gap-4">
-                                <div className="h-12 w-12 rounded-xl bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center shrink-0">
-                                    <Mail className="h-6 w-6 text-purple-600" />
-                                </div>
-                                <div className="space-y-1">
-                                    <h3 className="font-bold text-lg">{inv.event.title}</h3>
-                                    <p className="text-sm text-zinc-500">From {inv.sender.name}</p>
-                                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-zinc-400 mt-2">
-                                        <div className="flex items-center gap-1">
-                                            <Calendar className="h-3 w-3" />
-                                            {format(new Date(inv.event.date), 'PP')}
-                                        </div>
-                                        {inv.event.fee > 0 && (
-                                            <div className="flex items-center gap-1 text-blue-600 font-bold">
-                                                <DollarSign className="h-3 w-3" />
-                                                Fee: ${inv.event.fee}
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div className="flex gap-2">
-                                {inv.status === 'PENDING' ? (
-                                    <>
-                                        {inv.event.fee > 0 ? (
-                                            <Button 
-                                                size="sm" 
-                                                className="gap-2" 
-                                                isLoading={payAndAcceptMutation.isPending}
-                                                onClick={() => payAndAcceptMutation.mutate(inv.event.id)}
-                                            >
-                                                Pay & Accept
-                                            </Button>
-                                        ) : (
-                                            <Button 
-                                                size="sm" 
-                                                className="gap-2" 
-                                                isLoading={respondMutation.isPending}
-                                                onClick={() => respondMutation.mutate({ invitationId: inv.id, status: 'ACCEPTED' })}
-                                            >
-                                                <Check className="h-4 w-4" /> Accept
-                                            </Button>
-                                        )}
-                                        <Button 
-                                            size="sm" 
-                                            variant="outline" 
-                                            className="text-red-500"
-                                            isLoading={respondMutation.isPending}
-                                            onClick={() => respondMutation.mutate({ invitationId: inv.id, status: 'DECLINED' })}
-                                        >
-                                            <X className="h-4 w-4" /> Decline
-                                        </Button>
-                                    </>
-                                ) : (
-                                    <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${
-                                        inv.status === 'ACCEPTED' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                                    }`}>
-                                        {inv.status}
-                                    </span>
-                                )}
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-            ))
+          [...Array(3)].map((_, i) => <Skeleton key={i} className="h-32 w-full rounded-2xl" />)
+        ) : displayedInvitations.length === 0 ? (
+          <div className="text-center py-20 bg-white dark:bg-zinc-900 rounded-3xl border border-dashed border-zinc-200 dark:border-zinc-800 text-zinc-500">
+            <Mail className="h-10 w-10 mx-auto mb-3 text-zinc-300" />
+            <p>No {activeTab} invitations found.</p>
+          </div>
         ) : (
-            <div className="text-center py-20 bg-white dark:bg-zinc-900 rounded-3xl border border-dashed border-zinc-200 dark:border-zinc-800">
-                <Mail className="h-12 w-12 text-zinc-200 mx-auto mb-4" />
-                <h3 className="text-xl font-bold">No invitations yet</h3>
-                <p className="text-zinc-500 mt-2">When someone invites you to an event, it will appear here.</p>
-            </div>
+          displayedInvitations.map((invitation: any) => (
+            <Card key={invitation.id} className="p-6">
+              <div className="flex flex-col sm:flex-row gap-6 justify-between items-start">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
+                      invitation.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' : 
+                      invitation.status === 'ACCEPTED' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                    }`}>
+                      {invitation.status}
+                    </span>
+                    {invitation.event.fee > 0 && (
+                      <span className="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase flex items-center gap-1">
+                        <CreditCard className="h-3 w-3" /> Paid (${invitation.event.fee})
+                      </span>
+                    )}
+                  </div>
+                  
+                  <h3 className="text-xl font-bold mb-1">{invitation.event.title}</h3>
+                  <p className="text-sm text-zinc-500">
+                    {activeTab === 'received' ? (
+                        <>Invited by <strong className="text-zinc-900 dark:text-zinc-100">{invitation.sender.name}</strong> ({invitation.sender.email})</>
+                    ) : (
+                        <>Sent to <strong className="text-zinc-900 dark:text-zinc-100">{invitation.receiver.name}</strong> ({invitation.receiver.email})</>
+                    )}
+                  </p>
+                  
+                  <div className="mt-4 flex flex-wrap gap-4 text-sm text-zinc-500">
+                      <div className="flex items-center gap-1">
+                          <Calendar className="h-4 w-4" />
+                          {format(new Date(invitation.event.date), 'PP')} at {invitation.event.time}
+                      </div>
+                      {invitation.event.venue && (
+                          <div className="flex items-center gap-1">
+                              <MapPin className="h-4 w-4" />
+                              {invitation.event.venue}
+                          </div>
+                      )}
+                  </div>
+                </div>
+
+                {activeTab === 'received' && invitation.status === 'PENDING' && (
+                  <div className="flex gap-2 w-full sm:w-auto mt-4 sm:mt-0">
+                    <Button 
+                      variant="outline" 
+                      className="flex-1 sm:flex-none text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950 border-red-200"
+                      onClick={() => handleDecline(invitation.id)}
+                      disabled={updateStatusMutation.isPending}
+                    >
+                      <XCircle className="h-4 w-4 mr-2" /> Decline
+                    </Button>
+                    <Button 
+                      className="flex-1 sm:flex-none bg-black text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
+                      onClick={() => handleAccept(invitation)}
+                      disabled={updateStatusMutation.isPending || payAndAcceptMutation.isPending}
+                    >
+                      <CheckCircle className="h-4 w-4 mr-2" /> 
+                      {invitation.event.fee > 0 ? 'Pay & Accept' : 'Accept'}
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </Card>
+          ))
         )}
       </div>
     </div>
