@@ -123,6 +123,17 @@ export default function EventDetailsPage() {
 
   const renderJoinButton = () => {
     if (!user) return <Button size="lg" className="w-full" onClick={() => router.push('/login')}>Login to Join</Button>;
+    
+    if (user.role === 'ADMIN') return (
+      <div className="bg-zinc-900 text-white p-4 rounded-xl flex items-center gap-3 border border-zinc-800 shadow-lg">
+        <ShieldCheck className="h-5 w-5 text-indigo-400 shrink-0" />
+        <div className="flex flex-col">
+            <span className="font-bold text-sm">System Administrator</span>
+            <span className="text-[10px] text-zinc-400 uppercase tracking-widest font-medium">View Only Mode</span>
+        </div>
+      </div>
+    );
+
     if (isOwner) return <Button size="lg" className="w-full" onClick={() => router.push('/dashboard/my-events')}>Manage Event</Button>;
     
     if (isApproved) return (

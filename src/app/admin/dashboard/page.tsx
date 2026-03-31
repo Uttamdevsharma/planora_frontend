@@ -43,7 +43,7 @@ export default function AdminDashboardPage() {
       bg: 'bg-emerald-50',
     },
     {
-      name: 'Platform Revenue',
+      name: 'Total Earnings',
       value: `$${statsDataRaw.platformRevenue?.toFixed(2) || '0.00'}`,
       icon: DollarSign,
       color: 'text-orange-600',

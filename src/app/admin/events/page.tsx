@@ -93,6 +93,7 @@ export default function AdminEventsPage() {
                 <th className="px-6 py-4 font-semibold text-zinc-900 dark:text-zinc-100 uppercase tracking-tight text-xs">Event</th>
                 <th className="px-6 py-4 font-semibold text-zinc-900 dark:text-zinc-100 uppercase tracking-tight text-xs">Creator</th>
                 <th className="px-6 py-4 font-semibold text-zinc-900 dark:text-zinc-100 uppercase tracking-tight text-xs">Type</th>
+                <th className="px-6 py-4 font-semibold text-zinc-900 dark:text-zinc-100 uppercase tracking-tight text-xs">Fee</th>
                 <th className="px-6 py-4 font-semibold text-zinc-900 dark:text-zinc-100 uppercase tracking-tight text-xs text-center">Featured</th>
                 <th className="px-6 py-4 font-semibold text-zinc-900 dark:text-zinc-100 uppercase tracking-tight text-xs text-right">Actions</th>
               </tr>
