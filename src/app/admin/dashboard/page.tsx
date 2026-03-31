@@ -44,7 +44,7 @@ export default function AdminDashboardPage() {
     },
     {
       name: 'Total Earnings',
-      value: `$${statsDataRaw.platformRevenue?.toFixed(2) || '0.00'}`,
+      value: `$${statsDataRaw.totalEarnings?.toFixed(2) || '0.00'}`,
       icon: DollarSign,
       color: 'text-orange-600',
       bg: 'bg-orange-50',
