@@ -226,10 +226,21 @@ export default function MyEventsPage() {
                                             <MapPin className="h-4 w-4" />
                                             {event.venue}
                                         </div>
-                                        <div className="flex items-center gap-1">
+                                        <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
                                             <Users className="h-4 w-4" />
-                                            {event._count?.participants || 0} Joined
+                                            <span className="font-medium">{event.joinedCount ?? 0}</span>
+                                            <span>Joined</span>
                                         </div>
+                                        {(event.pendingCount ?? 0) > 0 && (
+                                            <div className="flex items-center gap-1 text-amber-600 dark:text-amber-400">
+                                                <span className="relative flex h-2 w-2">
+                                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                                                </span>
+                                                <span className="font-medium">{event.pendingCount}</span>
+                                                <span>Pending</span>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                                 <div className="flex gap-2">
