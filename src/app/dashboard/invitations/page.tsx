@@ -7,13 +7,15 @@ import api from '@/lib/api';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Skeleton } from '@/components/ui/Skeleton';
-import { Calendar, MapPin, CreditCard, CheckCircle, XCircle, Mail } from 'lucide-react';
+import { Calendar, MapPin, CreditCard, CheckCircle, XCircle, Mail, Eye } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 
 export default function InvitationsPage() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<'received' | 'sent'>('received');
 
   const { data: invitationsData, isLoading } = useQuery({
@@ -144,26 +146,39 @@ export default function InvitationsPage() {
                   </div>
                 </div>
 
-                {activeTab === 'received' && invitation.status === 'PENDING' && (
-                  <div className="flex gap-2 w-full sm:w-auto mt-4 sm:mt-0">
-                    <Button 
-                      variant="outline" 
-                      className="flex-1 sm:flex-none text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950 border-red-200"
-                      onClick={() => handleDecline(invitation.id)}
-                      disabled={updateStatusMutation.isPending}
-                    >
-                      <XCircle className="h-4 w-4 mr-2" /> Decline
-                    </Button>
-                    <Button 
-                      className="flex-1 sm:flex-none bg-black text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
-                      onClick={() => handleAccept(invitation)}
-                      disabled={updateStatusMutation.isPending || payAndAcceptMutation.isPending}
-                    >
-                      <CheckCircle className="h-4 w-4 mr-2" /> 
-                      {invitation.event.fee > 0 ? 'Pay & Accept' : 'Accept'}
-                    </Button>
-                  </div>
-                )}
+                <div className="flex flex-col gap-2 w-full sm:w-auto mt-4 sm:mt-0">
+                  <Button 
+                    variant="secondary" 
+                    size="sm"
+                    className="w-full sm:w-auto"
+                    onClick={() => router.push('/events/' + invitation.event.id)}
+                  >
+                    <Eye className="h-4 w-4 mr-2" /> View Event
+                  </Button>
+
+                  {activeTab === 'received' && invitation.status === 'PENDING' && (
+                    <div className="flex gap-2 w-full sm:w-auto">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        className="flex-1 sm:flex-none text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950 border-red-200"
+                        onClick={() => handleDecline(invitation.id)}
+                        disabled={updateStatusMutation.isPending}
+                      >
+                        <XCircle className="h-4 w-4 mr-2" /> Decline
+                      </Button>
+                      <Button 
+                        size="sm"
+                        className="flex-1 sm:flex-none bg-black text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
+                        onClick={() => handleAccept(invitation)}
+                        disabled={updateStatusMutation.isPending || payAndAcceptMutation.isPending}
+                      >
+                        <CheckCircle className="h-4 w-4 mr-2" /> 
+                        {invitation.event.fee > 0 ? 'Pay & Accept' : 'Accept'}
+                      </Button>
+                    </div>
+                  )}
+                </div>
               </div>
             </Card>
           ))
