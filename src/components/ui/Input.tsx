@@ -4,10 +4,11 @@ import { cn } from './Button';
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   error?: string;
+  description?: React.ReactNode;
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ className, label, error, type, ...props }, ref) => {
+  ({ className, label, error, description, type, ...props }, ref) => {
     return (
       <div className="w-full">
         {label && (
@@ -25,6 +26,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           ref={ref}
           {...props}
         />
+        {description && !error && <p className="mt-1.5 text-xs text-zinc-500 dark:text-zinc-400">{description}</p>}
         {error && <p className="mt-1.5 text-xs text-red-500">{error}</p>}
       </div>
     );

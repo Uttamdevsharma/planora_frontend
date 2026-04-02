@@ -67,7 +67,7 @@ export default function MyEventsPage() {
   const events = eventsData?.data?.data || [];
 
   const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<EventFormValues>({
-    resolver: zodResolver(eventSchema),
+    resolver: zodResolver(eventSchema) as any,
     defaultValues: {
         type: 'OFFLINE',
         isPublic: true,

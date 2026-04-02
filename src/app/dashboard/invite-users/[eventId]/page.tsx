@@ -180,7 +180,7 @@ export default function InviteUsersPage() {
                 </div>
                 <Button 
                     size="lg" 
-                    variant={invitedUsers[user.id] ? "secondary" : "default"}
+                    variant={invitedUsers[user.id] ? "secondary" : "primary"}
                     className={`gap-3 sm:w-auto w-full rounded-xl font-bold transition-all active:scale-95 ${
                         invitedUsers[user.id] 
                         ? 'bg-green-50 text-green-600 border-green-100 hover:bg-green-100 dark:bg-green-900/20 dark:text-green-400 dark:border-green-900/30' 

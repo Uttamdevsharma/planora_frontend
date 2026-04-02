@@ -26,7 +26,7 @@ export function AdminSidebar({ onLinkClick }: AdminSidebarProps) {
   ];
 
   return (
-    <aside className="hidden w-64 border-r border-zinc-200 bg-white dark:border-zinc-800 dark:bg-black lg:block">
+    <aside className="h-full w-full border-r border-zinc-200 bg-white dark:border-zinc-800 dark:bg-black">
       <div className="flex h-full flex-col p-6">
         <div className="mb-8 flex items-center gap-2">
           <ShieldCheck className="h-6 w-6 text-indigo-600" />
