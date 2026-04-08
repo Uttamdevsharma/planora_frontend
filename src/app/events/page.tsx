@@ -140,7 +140,7 @@ export default function EventsPage() {
           </div>
 
           {isLoading ? (
-            <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 xl:grid-cols-4 lg:grid-cols-4">
               {[...Array(6)].map((_, i) => (
                 <div key={i} className="space-y-4">
                   <Skeleton className="aspect-video w-full rounded-xl" />
@@ -151,7 +151,7 @@ export default function EventsPage() {
               ))}
             </div>
           ) : events.length > 0 ? (
-            <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 xl:grid-cols-4 lg:grid-cols-4">
               {events.map((event: Event) => (
                 <motion.div
                   key={event.id}

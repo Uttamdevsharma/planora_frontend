@@ -4,9 +4,11 @@ import React, { useState } from 'react';
 import Link from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from './Button';
-import { Menu, X, Calendar, User, LogOut, LayoutDashboard } from 'lucide-react';
+import { Menu, X, Calendar, User, LogOut, LayoutDashboard, ChevronDown, BookOpen, HelpCircle, Mail } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation';
 import Image from 'next/image';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ThemeToggle } from './ThemeToggle';
 
 interface NavbarProps {
   isDashboard?: boolean;
@@ -16,12 +18,20 @@ interface NavbarProps {
 export const Navbar = ({ isDashboard = false, onMenuClick }: NavbarProps) => {
   const { user, logout } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
+  const [isResourcesOpen, setIsResourcesOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
 
   const navLinks = [
     { name: 'Home', href: '/' },
     { name: 'Events', href: '/events' },
+    { name: 'Features', href: '/features' },
+  ];
+
+  const resourceLinks = [
+    { name: 'How It Works', href: '/#how-it-works', icon: BookOpen },
+    { name: 'FAQ', href: '/#faq', icon: HelpCircle },
+    { name: 'Support', href: 'mailto:support@planora.com', icon: Mail },
   ];
 
   const isActive = (href: string) => pathname === href;
@@ -51,7 +61,7 @@ export const Navbar = ({ isDashboard = false, onMenuClick }: NavbarProps) => {
             
             {!isDashboard && (
               <div className="hidden md:block">
-                <div className="ml-10 flex items-baseline space-x-4">
+                <div className="ml-10 flex items-center space-x-1">
                   {navLinks.map((link) => (
                     <button
                       key={link.name}
@@ -65,12 +75,58 @@ export const Navbar = ({ isDashboard = false, onMenuClick }: NavbarProps) => {
                       {link.name}
                     </button>
                   ))}
+
+                  {/* Resources Dropdown */}
+                  <div className="relative ml-2">
+                    <button
+                      onMouseEnter={() => setIsResourcesOpen(true)}
+                      onMouseLeave={() => setIsResourcesOpen(false)}
+                      className="flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-white transition-colors cursor-pointer"
+                    >
+                      Resources
+                      <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isResourcesOpen ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    <AnimatePresence>
+                      {isResourcesOpen && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                          onMouseEnter={() => setIsResourcesOpen(true)}
+                          onMouseLeave={() => setIsResourcesOpen(false)}
+                          className="absolute left-0 mt-1 w-56 origin-top-left rounded-xl border border-zinc-200 bg-white p-2 shadow-xl backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-950/90 z-[100]"
+                        >
+                          {resourceLinks.map((link) => (
+                            <button
+                              key={link.name}
+                              onClick={() => {
+                                if (link.href.startsWith('mailto:')) {
+                                    window.location.href = link.href;
+                                } else {
+                                    router.push(link.href);
+                                }
+                                setIsResourcesOpen(false);
+                              }}
+                              className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-white transition-all group"
+                            >
+                              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-50 dark:bg-zinc-900 group-hover:bg-indigo-50 dark:group-hover:bg-indigo-900/40 group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
+                                <link.icon className="h-4 w-4" />
+                              </div>
+                              {link.name}
+                            </button>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
                 </div>
               </div>
             )}
           </div>
           <div className="hidden md:block">
             <div className="ml-4 flex items-center gap-4 md:ml-6">
+              <ThemeToggle />
               {user ? (
                 <div className="flex items-center gap-4">
                   {!isDashboard && (
@@ -113,6 +169,7 @@ export const Navbar = ({ isDashboard = false, onMenuClick }: NavbarProps) => {
             </div>
           </div>
           <div className="flex items-center gap-2 md:hidden">
+            <ThemeToggle />
             {isDashboard && user && (
                <div className="flex items-center gap-3">
                   <div className="h-8 w-8 overflow-hidden rounded-full bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800 flex items-center justify-center">
@@ -158,6 +215,32 @@ export const Navbar = ({ isDashboard = false, onMenuClick }: NavbarProps) => {
                 {link.name}
               </button>
             ))}
+
+            {/* Mobile Resources Section */}
+            {!isDashboard && (
+              <div className="pt-2">
+                <p className="px-3 text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-2">Resources</p>
+                <div className="space-y-1">
+                  {resourceLinks.map((link) => (
+                    <button
+                      key={link.name}
+                      onClick={() => {
+                        if (link.href.startsWith('mailto:')) {
+                            window.location.href = link.href;
+                        } else {
+                            router.push(link.href);
+                        }
+                        setIsOpen(false);
+                      }}
+                      className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-base font-medium text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-white transition-colors"
+                    >
+                      <link.icon className="h-5 w-5 opacity-70" />
+                      {link.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
             {user && (
                   <button
                   onClick={() => {

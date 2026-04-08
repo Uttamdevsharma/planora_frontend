@@ -9,9 +9,16 @@ import { Button } from '@/components/ui/Button';
 import { EventCard, Event } from '@/components/ui/EventCard';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar, ArrowRight, Star, Plus, Search, ChevronLeft, ChevronRight, Video, MapPin, Tag, User } from 'lucide-react';
+import { Calendar, ArrowRight, Star, Plus, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+
+// New Section Components
+import { HowItWorks } from '@/components/sections/HowItWorks';
+import { CoreFeatures } from '@/components/sections/CoreFeatures';
+import { PlatformStats } from '@/components/sections/PlatformStats';
+import { Testimonials } from '@/components/sections/Testimonials';
+import { FAQ } from '@/components/sections/FAQ';
 
 export default function HomePage() {
   const router = useRouter();
@@ -74,20 +81,41 @@ export default function HomePage() {
         const firstChild = sliderRef.current.firstElementChild as HTMLElement;
         if (firstChild) {
             const cardWidth = firstChild.offsetWidth;
-            const gap = 24; // matches gap-6
+            const gap = 24;
             const scrollAmount = direction === 'left' ? -(cardWidth + gap) : (cardWidth + gap);
             sliderRef.current.scrollTo({ left: scrollLeft + scrollAmount, behavior: 'smooth' });
         }
     }
   };
 
+  // Animation Variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1,
+      transition: { 
+        staggerChildren: 0.1,
+        delayChildren: 0.3
+      }
+    }
+  };
+
+  const itemVariants: import('framer-motion').Variants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { duration: 0.5, ease: "easeOut" }
+    }
+  };
+
   return (
-    <div className="flex min-h-screen flex-col bg-white dark:bg-black">
+    <div className="flex min-h-screen flex-col bg-white dark:bg-black selection:bg-indigo-500/30">
       <Navbar />
 
       <main className="flex-1">
-        {/* Hero Section */}
-        <section className="relative overflow-hidden py-16 sm:py-24">
+        {/* 1. Hero Section */}
+        <section className="relative overflow-hidden pt-20 pb-16 sm:pt-32 sm:pb-24">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             {isFeaturedLoading ? (
               <div className="grid grid-cols-1 gap-12 lg:grid-cols-2">
@@ -105,42 +133,57 @@ export default function HomePage() {
             ) : featuredEvent ? (
               <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
                 <motion.div 
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.5 }}
+                    variants={containerVariants}
+                    initial="hidden"
+                    animate="visible"
                     className="space-y-8"
                 >
-                  <div className="inline-flex items-center gap-2 rounded-full bg-zinc-100 px-3 py-1 text-sm font-medium text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100">
+                  <motion.div variants={itemVariants} className="inline-flex items-center gap-2 rounded-full bg-zinc-100 px-3 py-1 text-sm font-medium text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100 uppercase tracking-wider">
                     <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                     Featured Event
-                  </div>
-                  <h1 className="text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-white sm:text-6xl">
+                  </motion.div>
+                  <motion.h1 
+                    variants={itemVariants} 
+                    className="text-4xl font-black tracking-tight text-zinc-900 dark:text-white sm:text-6xl lg:text-7xl"
+                  >
                     {featuredEvent.title}
-                  </h1>
-                  <p className="max-w-xl text-lg text-zinc-600 dark:text-zinc-400">
+                  </motion.h1>
+                  <motion.p 
+                    variants={itemVariants} 
+                    className="max-w-xl text-xl text-zinc-600 dark:text-zinc-400 leading-relaxed"
+                  >
                     {featuredEvent.description}
-                  </p>
-                  <div className="flex flex-wrap gap-4">
-                    <Button size="lg" className="gap-2" onClick={() => router.push(`/events/${featuredEvent.id}`)}>
-                      Join Event <ArrowRight className="h-5 w-5" />
+                  </motion.p>
+                  <motion.div variants={itemVariants} className="flex flex-wrap gap-4">
+                    <Button 
+                      size="lg" 
+                      className="gap-2 px-10 py-7 text-lg rounded-full shadow-lg shadow-black/20 dark:shadow-white/5 transition-transform hover:scale-105 active:scale-95" 
+                      onClick={() => router.push(`/events/${featuredEvent.id}`)}
+                    >
+                      Join Event <ArrowRight className="h-6 w-6" />
                     </Button>
-                    <Button size="lg" variant="outline" onClick={() => router.push('/events')}>
+                    <Button 
+                      size="lg" 
+                      variant="outline" 
+                      className="px-10 py-7 text-lg rounded-full border-2 transition-transform hover:scale-105 active:scale-95" 
+                      onClick={() => router.push('/events')}
+                    >
                       Browse More
                     </Button>
-                  </div>
+                  </motion.div>
                 </motion.div>
                 <motion.div 
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.5, delay: 0.2 }}
-                    className="relative aspect-video overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900 shadow-2xl"
+                    initial={{ opacity: 0, scale: 0.9, rotate: -2 }}
+                    animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                    transition={{ duration: 0.8, ease: "easeOut", delay: 0.5 }}
+                    className="relative aspect-video overflow-hidden rounded-[2.5rem] border border-zinc-200 bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.2)]"
                 >
                   {featuredEvent.imageUrl ? (
                     <Image
                       src={featuredEvent.imageUrl}
                       alt={featuredEvent.title}
                       fill
-                      className="object-cover"
+                      className="object-cover transition-transform duration-700 hover:scale-110"
                       priority
                     />
                   ) : (
@@ -151,82 +194,100 @@ export default function HomePage() {
                 </motion.div>
               </div>
             ) : (
-              <div className="text-center py-12">
-                <h1 className="text-4xl font-bold mb-4">No events found</h1>
-                <p className="text-zinc-500 mb-8">Be the first to create an amazing event!</p>
-                <Button size="lg" className="gap-2" onClick={() => router.push('/dashboard/my-events')}>
-                  <Plus className="h-5 w-5" /> Create Event
+              <div className="text-center py-20">
+                <h1 className="text-5xl font-black mb-6">No events found</h1>
+                <p className="text-zinc-500 text-xl mb-10 max-w-2xl mx-auto">Be the first to create an amazing event and start growing your community today!</p>
+                <Button size="lg" className="gap-2 px-12 py-8 rounded-full" onClick={() => router.push('/dashboard/my-events')}>
+                  <Plus className="h-6 w-6" /> Create My First Event
                 </Button>
               </div>
             )}
           </div>
         </section>
 
-        {/* Upcoming Events Slider SECTION */}
-        <section className="py-20 bg-zinc-50 dark:bg-zinc-950 overflow-hidden">
+        {/* 2. Upcoming Events Slider SECTION */}
+        <motion.section 
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          className="py-24 bg-zinc-50 dark:bg-zinc-950/50 overflow-hidden"
+        >
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="mb-12">
-              <h2 className="text-3xl font-extrabold text-zinc-900 dark:text-white sm:text-4xl">Upcoming Events</h2>
-              <p className="mt-4 text-lg text-zinc-500">The hottest events happening on Planora right now.</p>
+            <div className="mb-16 flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+              <div>
+                <h2 className="text-4xl font-black text-zinc-900 dark:text-white mb-4">Upcoming Events</h2>
+                <p className="text-xl text-zinc-500 max-w-2xl">The hottest events happening on Planora right now. Don't miss out on these trending experiences.</p>
+              </div>
+              <div className="flex gap-4">
+                  <button 
+                      onClick={() => scrollSlider('left')}
+                      className="p-4 rounded-full border border-zinc-200 bg-white shadow-sm hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:bg-zinc-800 transition-all active:scale-95"
+                  >
+                      <ChevronLeft className="h-6 w-6" />
+                  </button>
+                  <button 
+                      onClick={() => scrollSlider('right')}
+                      className="p-4 rounded-full border border-zinc-200 bg-white shadow-sm hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:bg-zinc-800 transition-all active:scale-95"
+                  >
+                      <ChevronRight className="h-6 w-6" />
+                  </button>
+              </div>
             </div>
 
-            <div className="relative group px-4 sm:px-0">
-              <button 
-                  onClick={() => scrollSlider('left')}
-                  className="absolute left-0 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full border border-zinc-200 bg-white/80 backdrop-blur-md shadow-xl hover:bg-white dark:border-zinc-800 dark:bg-zinc-900/80 dark:hover:bg-zinc-900 transition-all hover:scale-110 hidden sm:flex items-center justify-center -ml-4 lg:-ml-6"
-              >
-                  <ChevronLeft className="h-6 w-6" />
-              </button>
-
+            <div className="relative">
               <div 
                   ref={sliderRef}
-                  className="flex gap-6 items-stretch overflow-x-auto pb-8 snap-x snap-mandatory scrollbar-hide no-scrollbar"
+                  className="flex gap-8 items-stretch overflow-x-auto pb-12 snap-x snap-mandatory no-scrollbar"
                   style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
               >
                 {isUpcomingLoading ? (
                   [...Array(6)].map((_, i) => (
-                    <div key={i} className="min-w-[320px] sm:min-w-[400px] snap-start">
-                      <Skeleton className="aspect-video w-full rounded-3xl" />
-                      <Skeleton className="mt-4 h-6 w-3/4" />
-                      <Skeleton className="mt-2 h-4 w-1/2" />
+                    <div key={i} className="min-w-[340px] sm:min-w-[420px] snap-start">
+                      <Skeleton className="aspect-[16/10] w-full rounded-3xl" />
+                      <Skeleton className="mt-6 h-8 w-3/4" />
+                      <Skeleton className="mt-3 h-5 w-1/2" />
                     </div>
                   ))
                 ) : upcomingEvents && upcomingEvents.length > 0 ? (
                   upcomingEvents.map((event: any) => (
-                    <div key={event.id} className="w-[320px] sm:w-[400px] flex-shrink-0 snap-start h-full">
+                    <motion.div 
+                        key={event.id} 
+                        whileHover={{ y: -8 }}
+                        className="w-[340px] sm:w-[420px] flex-shrink-0 snap-start h-full"
+                    >
                       <EventCard event={event} />
-                    </div>
+                    </motion.div>
                   ))
                 ) : (
-                  <div className="w-full text-center py-20 text-zinc-400 font-medium">
-                      New public events will appear here soon.
+                  <div className="w-full text-center py-24 bg-white dark:bg-zinc-900 rounded-3xl border-2 border-dashed border-zinc-200 dark:border-zinc-800 text-zinc-400 font-bold text-xl">
+                      New public events will appear here soon. Stay tuned!
                   </div>
                 )}
               </div>
-
-              <button 
-                  onClick={() => scrollSlider('right')}
-                  className="absolute right-0 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full border border-zinc-200 bg-white/80 backdrop-blur-md shadow-xl hover:bg-white dark:border-zinc-800 dark:bg-zinc-900/80 dark:hover:bg-zinc-900 transition-all hover:scale-110 hidden sm:flex items-center justify-center -mr-4 lg:-mr-6"
-              >
-                  <ChevronRight className="h-6 w-6" />
-              </button>
             </div>
           </div>
-        </section>
+        </motion.section>
 
-        {/* Categories Section */}
-        <section className="py-20 border-t border-zinc-100 dark:border-zinc-900">
+        {/* 3. Categories Section */}
+        <section className="py-24">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="mb-12">
-               <h2 className="text-3xl font-extrabold text-zinc-900 dark:text-white mb-8">Discover by Category</h2>
-               <div className="flex flex-wrap gap-2">
+            <div className="mb-16">
+               <motion.div
+                 initial={{ opacity: 0, x: -20 }}
+                 whileInView={{ opacity: 1, x: 0 }}
+                 viewport={{ once: true }}
+               >
+                 <h2 className="text-4xl font-black text-zinc-900 dark:text-white mb-10">Discover by Category</h2>
+               </motion.div>
+               
+               <div className="flex flex-wrap gap-3">
                  {categories.map((cat) => (
                    <button
                      key={cat.id}
                      onClick={() => setFilter(cat.id)}
-                     className={`rounded-full px-6 py-2.5 text-sm font-bold transition-all ${
+                     className={`rounded-full px-8 py-3.5 text-base font-bold transition-all duration-300 ${
                        filter === cat.id
-                         ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30'
+                         ? 'bg-blue-600 text-white shadow-xl shadow-blue-500/40 ring-4 ring-blue-500/10'
                          : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800'
                      }`}
                    >
@@ -237,41 +298,43 @@ export default function HomePage() {
             </div>
 
             {isCategoryLoading ? (
-              <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
                 {[...Array(4)].map((_, i) => (
-                  <div key={i} className="space-y-4">
-                    <Skeleton className="aspect-[4/3] w-full" />
-                    <Skeleton className="h-6 w-3/4" />
-                    <Skeleton className="h-4 w-full" />
+                  <div key={i} className="space-y-5">
+                    <Skeleton className="aspect-[4/3] w-full rounded-2xl" />
+                    <Skeleton className="h-7 w-3/4 rounded-lg" />
+                    <Skeleton className="h-5 w-full rounded-lg" />
                   </div>
                 ))}
               </div>
             ) : categoryEvents && categoryEvents.length > 0 ? (
-              <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-                {categoryEvents.map((event: any) => (
+              <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
+                {categoryEvents.map((event: any, index: number) => (
                   <motion.div 
                     key={event.id}
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.3 }}
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                    whileHover={{ scale: 1.02 }}
                   >
                     <EventCard event={event} />
                   </motion.div>
                 ))}
               </div>
             ) : (
-              <div className="text-center py-20 bg-zinc-50 dark:bg-zinc-900/50 rounded-3xl border-2 border-dashed border-zinc-200 dark:border-zinc-800">
-                  <Search className="h-12 w-12 text-zinc-300 dark:text-zinc-700 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold mb-2">No results matching this category</h3>
-                  <p className="text-zinc-500">Check back later or explore one of our other categories!</p>
+              <div className="text-center py-24 bg-zinc-50 dark:bg-zinc-900/50 rounded-[3rem] border-2 border-dashed border-zinc-200 dark:border-zinc-800">
+                  <Search className="h-16 w-16 text-zinc-300 dark:text-zinc-700 mx-auto mb-6" />
+                  <h3 className="text-2xl font-black mb-3">No matching events</h3>
+                  <p className="text-zinc-500 text-lg">Check back later or explore one of our other popular categories!</p>
               </div>
             )}
             
-            <div className="mt-16 text-center">
+            <div className="mt-20 text-center">
                  <Button 
                     variant="outline" 
                     size="lg" 
-                    className="px-10 py-6 rounded-full font-bold border-2"
+                    className="px-12 py-8 rounded-full font-black border-2 border-zinc-200 dark:border-zinc-800 hover:border-zinc-900 transition-all hover:scale-105"
                     onClick={() => router.push('/events')}
                  >
                     View All Platform Events
@@ -280,28 +343,63 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* CTA Section */}
-        <section className="py-20 px-4">
-            <div className="mx-auto max-w-5xl rounded-3xl bg-black px-8 py-16 text-center text-white dark:bg-white dark:text-black overflow-hidden relative">
-                <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
-                     <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-white dark:bg-black rounded-full blur-[100px]" />
-                     <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-white dark:bg-black rounded-full blur-[100px]" />
-                </div>
-                <h2 className="relative text-3xl font-bold sm:text-5xl">Ready to host your own event?</h2>
-                <p className="relative mx-auto mt-6 max-w-2xl text-lg opacity-80">
-                    Join thousands of organizers using Planora to create unforgettable experiences. 
-                    From private gatherings to public conferences, we have you covered.
-                </p>
-                <div className="relative mt-10 flex flex-wrap justify-center gap-4">
-                    <Button size="lg" variant="secondary" className="px-10" onClick={() => router.push('/dashboard/my-events')}>
-                        Create Event
-                    </Button>
-                    <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10 dark:border-black dark:text-black dark:hover:bg-black/10 px-10" onClick={() => router.push('/events')}>
-                        Join Events
-                    </Button>
+        {/* 4. How It Works */}
+        <HowItWorks />
+
+        {/* 5. Core Features */}
+        <CoreFeatures />
+
+        {/* 6. Platform Statistics */}
+        <PlatformStats />
+
+        {/* 7. Testimonials */}
+        <Testimonials />
+
+        {/* 8. FAQ */}
+        <FAQ />
+
+        {/* 9. CTA Section */}
+        <motion.section 
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          className="pb-24 pt-12 px-4 sm:px-6 flex justify-center"
+        >
+            <div className="w-full max-w-5xl rounded-[3rem] bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 px-6 py-16 sm:py-20 text-center relative overflow-hidden shadow-sm dark:shadow-none">
+                {/* Subtle Glow Effects for Premium Feel */}
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80%] h-[80%] bg-blue-500/10 dark:bg-blue-500/20 blur-[120px] pointer-events-none rounded-full" />
+                
+                <div className="relative z-10 max-w-3xl mx-auto space-y-8">
+                  <h2 className="text-4xl font-black tracking-tight text-zinc-900 dark:text-white sm:text-5xl md:text-6xl leading-[1.1]">
+                    Ready to host your own <br className="hidden sm:block" />
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400">
+                      Masterpiece?
+                    </span>
+                  </h2>
+                  <p className="mx-auto max-w-xl text-lg sm:text-xl text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                      Join thousands of organizers using Planora to create unforgettable experiences. 
+                      From private gatherings to global conferences, we provide the tools you need to succeed.
+                  </p>
+                  <div className="flex flex-col sm:flex-row justify-center items-center gap-4 pt-4">
+                      <Button 
+                        size="lg" 
+                        className="w-full sm:w-auto px-10 py-7 rounded-full text-lg font-bold shadow-lg shadow-blue-500/20 transition-transform hover:scale-105 active:scale-95 bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100" 
+                        onClick={() => router.push('/dashboard/my-events')}
+                      >
+                          Start Creating Free
+                      </Button>
+                      <Button 
+                        size="lg" 
+                        variant="outline" 
+                        className="w-full sm:w-auto px-10 py-7 rounded-full text-lg font-bold border-2 border-zinc-200 dark:border-zinc-800 transition-transform hover:scale-105 active:scale-95 bg-transparent hover:bg-zinc-200 dark:hover:bg-zinc-800 dark:text-white" 
+                        onClick={() => router.push('/events')}
+                      >
+                          Explore Events
+                      </Button>
+                  </div>
                 </div>
             </div>
-        </section>
+        </motion.section>
       </main>
 
       <Footer />

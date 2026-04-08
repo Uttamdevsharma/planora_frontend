@@ -11,8 +11,9 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { 
     Plus, Search, Edit2, Trash2, 
     MoreVertical, ExternalLink, Calendar,
-    MapPin, Users, Filter, X, Upload, Mail
+    MapPin, Users, Filter, X, Upload, Mail, Sparkles, Loader2
 } from 'lucide-react';
+
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { useForm } from 'react-hook-form';
@@ -53,6 +54,7 @@ export default function MyEventsPage() {
   const [bannerFile, setBannerFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isPaid, setIsPaid] = useState(false);
+  const [isGeneratingDesc, setIsGeneratingDesc] = useState(false);
 
   const { data: eventsData, isLoading } = useQuery({
     queryKey: ['myEventsList', user?.id],
@@ -76,6 +78,33 @@ export default function MyEventsPage() {
   });
 
   const eventType = watch('type');
+
+  const handleGenerateDescription = async () => {
+    const title = watch('title');
+    if (!title || title.trim().length < 3) {
+      toast.error('Please enter an event title first (min 3 characters)');
+      return;
+    }
+    setIsGeneratingDesc(true);
+    try {
+      const response = await api.post('/ai/generate-description', {
+        title: watch('title'),
+        venue: watch('venue') || undefined,
+        date: watch('date') || undefined,
+        type: watch('type') || undefined,
+      });
+      const generated = response.data?.data?.description;
+      if (generated) {
+        setValue('description', generated, { shouldValidate: true });
+        toast.success('Description generated! Feel free to edit it.');
+      }
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to generate description');
+    } finally {
+      setIsGeneratingDesc(false);
+    }
+  };
+
 
   const createMutation = useMutation({
     mutationFn: (data: FormData) => api.post('/events', data, {
@@ -296,11 +325,27 @@ export default function MyEventsPage() {
                     <div className="space-y-4">
                         <Input label="Event Title" placeholder="e.g. Summer Tech Conference" {...register('title')} error={errors.title?.message} />
                         
+                        {/* Description with AI Generator */}
                         <div>
-                            <label className="mb-1.5 block text-sm font-medium">Description</label>
+                            <div className="mb-1.5 flex items-center justify-between">
+                              <label className="block text-sm font-medium">Description</label>
+                              <button
+                                type="button"
+                                id="ai-generate-desc-btn"
+                                onClick={handleGenerateDescription}
+                                disabled={isGeneratingDesc}
+                                className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-indigo-500 to-blue-600 px-3 py-1 text-[11px] font-semibold text-white shadow-sm shadow-indigo-400/30 transition-all hover:scale-105 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
+                              >
+                                {isGeneratingDesc ? (
+                                  <><Loader2 className="h-3 w-3 animate-spin" /> Generating...</>
+                                ) : (
+                                  <><Sparkles className="h-3 w-3" /> Generate with AI</>
+                                )}
+                              </button>
+                            </div>
                             <textarea 
-                                className="w-full min-h-[120px] rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm dark:border-zinc-800 dark:bg-zinc-950"
-                                placeholder="Tell us more about the event..."
+                                className="w-full min-h-[120px] rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm dark:border-zinc-800 dark:bg-zinc-950 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition-all"
+                                placeholder="Tell us more about the event, or click ✨ Generate with AI above..."
                                 {...register('description')}
                             />
                             {errors.description && <p className="mt-1.5 text-xs text-red-500">{errors.description.message}</p>}
