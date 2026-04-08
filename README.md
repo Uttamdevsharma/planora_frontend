@@ -1,7 +1,5 @@
 # Planora 📅
 
-![Planora Dashboard Banner](https://via.placeholder.com/1200x400/18181b/ffffff?text=Planora+-+Event+Management+Made+Simple)
-
 > A modern, elegant event management and participation platform designed for seamless event organization and scalable engagement.
 
 🟢 **Live Demo**: [https://planora-client-topaz.vercel.app](https://planora-client-topaz.vercel.app)
