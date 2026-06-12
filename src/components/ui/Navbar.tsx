@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from './Button';
-import { Menu, X, Calendar, User, LogOut, LayoutDashboard, ChevronDown, BookOpen, HelpCircle, Mail } from 'lucide-react';
+import { Menu, X, Calendar, LogOut, LayoutDashboard, ChevronDown, BookOpen, HelpCircle, Mail } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -25,13 +25,13 @@ export const Navbar = ({ isDashboard = false, onMenuClick }: NavbarProps) => {
   const navLinks = [
     { name: 'Home', href: '/' },
     { name: 'Events', href: '/events' },
-    { name: 'Features', href: '/features' },
+    { name: 'For Organizers', href: '/for-organizers' },
   ];
 
   const resourceLinks = [
-    { name: 'How It Works', href: '/#how-it-works', icon: BookOpen },
-    { name: 'FAQ', href: '/#faq', icon: HelpCircle },
-    { name: 'Support', href: 'mailto:support@planora.com', icon: Mail },
+    { name: 'How It Works', href: '/how-it-works', icon: BookOpen },
+    { name: 'FAQ', href: '/faq', icon: HelpCircle },
+    { name: 'Contact Us', href: '/contact', icon: Mail },
   ];
 
   const isActive = (href: string) => pathname === href;
@@ -83,7 +83,7 @@ export const Navbar = ({ isDashboard = false, onMenuClick }: NavbarProps) => {
                       onMouseLeave={() => setIsResourcesOpen(false)}
                       className="flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-white transition-colors cursor-pointer"
                     >
-                      Resources
+                      Learn
                       <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isResourcesOpen ? 'rotate-180' : ''}`} />
                     </button>
 
@@ -216,10 +216,10 @@ export const Navbar = ({ isDashboard = false, onMenuClick }: NavbarProps) => {
               </button>
             ))}
 
-            {/* Mobile Resources Section */}
+            {/* Mobile Learn Section */}
             {!isDashboard && (
               <div className="pt-2">
-                <p className="px-3 text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-2">Resources</p>
+                <p className="px-3 text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-2">Learn</p>
                 <div className="space-y-1">
                   {resourceLinks.map((link) => (
                     <button

@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
 import api from '@/lib/api';
 
-export default function AuthSuccessPage() {
+function AuthSuccessContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { login } = useAuth();
@@ -54,4 +54,12 @@ export default function AuthSuccessPage() {
   }, [token, login, router]);
 
   return null;
+}
+
+export default function AuthSuccessPage() {
+  return (
+    <Suspense fallback={null}>
+      <AuthSuccessContent />
+    </Suspense>
+  );
 }
