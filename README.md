@@ -8,7 +8,7 @@
 
 Planora is a robust web platform that bridges the gap between event organizers and participants. It provides an intuitive, high-performance interface for event discovery, secure registrations, dynamic user dashboards, and comprehensive administrative oversight. The frontend is built to deliver a premium user experience with responsive design, smooth animations, and robust forms.
 
-## ✨ Feature
+## ✨ Features
 
 - **Role-Based Workflows**: Tailored experiences with dedicated flows for both standard `User` and `Admin` roles.
 - **Event Discovery & Participation**: Browse public events and seamlessly apply to join with status tracking (Pending/Approved/Rejected).
