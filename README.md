@@ -66,7 +66,7 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the application running.
 
-### 4. Build for Production
+### 4. Build for Productio
 
 To create an optimized production build, run:
 
