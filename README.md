@@ -29,7 +29,7 @@ Planora is a robust web platform that bridges the gap between event organizers a
 - **Icons & UI:** [Lucide React](https://lucide.dev/), Tailwind Merge, Classnames
 - **Payments:** [Stripe React](https://stripe.com/docs/stripe-js/react)
 
-## 🚀 Setup Instructions
+## 🚀 Setup Instruction
 
 Follow these steps to get the project up and running on your local machine.
 
